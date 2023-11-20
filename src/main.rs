@@ -3,14 +3,12 @@ use chrono::{NaiveDate, Utc};
 use menu::MensaMenu;
 use reqwest::StatusCode;
 use serde::{Serialize, Deserialize};
-use sqlx::{SqlitePool, sqlite::SqlitePoolOptions};
 
 mod config;
 mod menu;
 
 #[derive(Clone, FromRef)]
 struct AppState {
-    db: SqlitePool,
     req_client: reqwest::Client,
 }
 
@@ -39,13 +37,9 @@ async fn retrieve_menu(
 async fn main() {
     tracing_subscriber::fmt().init();
 
-    let db = SqlitePoolOptions::new()
-        .max_connections(5)
-    .connect("sqlite::memory:").await.expect("could not connect to db");
-
     let req_client = reqwest::Client::new();
 
-    let state = AppState { db, req_client };
+    let state = AppState { req_client };
 
     let app = Router::new()
         .route("/menu", get(retrieve_menu))

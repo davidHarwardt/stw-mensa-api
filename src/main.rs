@@ -51,7 +51,7 @@ async fn main() {
         .route("/menu", get(retrieve_menu))
     .with_state(state);
 
-    let addr = ([0, 0, 0, 0], 3000).into();
+    let addr = ([0, 0, 0, 0], 3050).into();
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await

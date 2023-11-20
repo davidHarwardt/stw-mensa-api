@@ -55,7 +55,7 @@ impl MealTag {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Meal {
     pub name: String,
-    pub price: MealPrice,
+    pub price: Option<MealPrice>,
     pub tags: Vec<MealTag>,
 }
 
@@ -108,8 +108,6 @@ pub enum MenuError {
     CategoryNameNotFound,
     #[error("could not find meal name")]
     MealNameNotFound,
-    #[error("could not find meal price")]
-    MealPriceNotFound,
 }
 
 impl MensaMenu {
@@ -164,12 +162,12 @@ impl MensaMenu {
                     .filter_map(|v| MealTag::from_name(&v.inner_html()))
                 .collect();
 
-                let price_field = meal.select(&price_sel)
+                let price = meal.select(&price_sel)
                     .next()
-                .ok_or(MenuError::MealPriceNotFound)?;
-                let price = text_content(&price_field)
-                    .parse()
-                .map_err(|_| MenuError::MealPriceNotFound)?;
+                .and_then(|v| {
+                    text_content(&v).parse().ok()
+                });
+
                 category.meals.push(Meal {
                     name, price, tags,
                 });
